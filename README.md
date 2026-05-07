@@ -65,3 +65,5 @@ s tvojom novom adresom (npr. `sevrovic@fpz.unizg.hr`).
 - **v0.5** — dodani linkovi na referencu izvora financiranja (msevrovic.github.io/Izvori-financiranja---KONTA) iznad forme i pod hint-om Klasifikacije, plus verzija prikazana u footeru.
 - **v0.6** — primatelji: forma šalje na fjanus@fpz.unizg.hr (preko `action`) s msevrovic@fpz.unizg.hr i sevrovic@gmail.com u CC (`_cc`). Footer ažuriran.
 - **v0.7** — EUR formatiranje prema ISO 4217 (oznaka iza iznosa, decimale zarezom). Inputi imaju vidljiv "EUR" / "%" suffix. Pri slanju, `toLocaleString('hr-HR')` formatira iznose u npr. "10 500,50 EUR" prije nego što FormSubmit primi vrijednost.
+- **v0.8** — EUR format ispravljen na hrvatski standard "123.456,78 EUR" (točka za tisuće, zarez za decimale). Datumi se na slanju formatiraju u "DD/MM/GGGG", labela datuma sada eksplicitno navodi format. `lang="hr-HR"` postavljen na date inpute.
+- **v0.9** — PDF upload za Ugovor/odluku. Forma sada ima `enctype="multipart/form-data"`, dodano polje `<input type="file" name="attachment" accept="application/pdf">`. Korisnik može priložiti URL, PDF, ili oboje. PDF dolazi kao attachment u mailu (max ~25 MB).
