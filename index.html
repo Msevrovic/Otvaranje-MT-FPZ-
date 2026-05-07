@@ -127,6 +127,17 @@
     font-weight: 600;
     pointer-events: none;
   }
+  input[type="file"] {
+    width: 100%;
+    padding: 8px 11px;
+    border: 1px dashed var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fafbfc;
+    cursor: pointer;
+  }
+  input[type="file"]:hover { border-color: var(--light-blue); background: #fff; }
   .submit-row {
     display: flex;
     justify-content: flex-end;
@@ -189,7 +200,7 @@
       </div>
     </div>
 
-    <form action="https://formsubmit.co/msevrovic@fpz.unizg.hr" method="POST">
+    <form action="https://formsubmit.co/msevrovic@fpz.unizg.hr" method="POST" enctype="multipart/form-data">
 
       <input type="hidden" name="_subject" value="Novi zahtjev: Konto kartica projekta">
       <input type="hidden" name="_template" value="table">
@@ -240,12 +251,12 @@
         </div>
         <div class="row">
           <div class="field">
-            <label>Datum početka</label>
-            <input type="date" name="Datum pocetka">
+            <label>Datum početka <span style="font-weight:400; color: var(--muted);">(DD/MM/GGGG)</span></label>
+            <input type="date" id="datum-pocetka" name="Datum pocetka" lang="hr-HR">
           </div>
           <div class="field">
-            <label>Datum završetka</label>
-            <input type="date" name="Datum zavrsetka">
+            <label>Datum završetka <span style="font-weight:400; color: var(--muted);">(DD/MM/GGGG)</span></label>
+            <input type="date" id="datum-zavrsetka" name="Datum zavrsetka" lang="hr-HR">
           </div>
         </div>
       </fieldset>
@@ -326,7 +337,7 @@
               <input type="number" id="ukupna" name="Ukupna vrijednost (EUR)" min="0" step="0.01" placeholder="npr. 10000,00">
               <span class="suffix">EUR</span>
             </div>
-            <div class="hint">Decimale: zarez (npr. 10 500,50). Iznos se sprema u EUR prema ISO 4217.</div>
+            <div class="hint">Format na ispisu: 123.456,78 EUR (zarez za decimale, točka za tisuće, ISO 4217).</div>
           </div>
           <div class="field">
             <label>Postotak za FPZ</label>
@@ -370,8 +381,13 @@
       <fieldset>
         <legend>Dodatno</legend>
         <div class="field">
-          <label>Ugovor / odluka / poveznica</label>
-          <input type="text" name="Ugovor poveznica" placeholder="URL na sharepoint, klasa, ur.broj...">
+          <label>Ugovor / odluka — poveznica</label>
+          <input type="text" name="Ugovor poveznica" placeholder="URL na SharePoint, klasa, ur.broj... (može biti prazno ako prilažeš PDF)">
+        </div>
+        <div class="field">
+          <label>Ugovor / odluka — PDF prilog <span style="font-weight:400; color: var(--muted);">(opcionalno)</span></label>
+          <input type="file" name="attachment" accept="application/pdf,.pdf" id="ugovor-pdf">
+          <div class="hint">Možeš priložiti PDF (max ~25 MB). Stiže kao attachment u mailu.</div>
         </div>
         <div class="field">
           <label>Napomena</label>
@@ -391,7 +407,7 @@
     <div style="margin-top: 6px;">
       <a href="https://msevrovic.github.io/Izvori-financiranja---KONTA/index.html" target="_blank" rel="noopener" style="color: var(--navy-dark); text-decoration: none;">Izvori financiranja & konta ↗</a>
       &nbsp;·&nbsp;
-      <span style="color: #9ca3af;">v0.7 &middot; 7. svibnja 2026.</span>
+      <span style="color: #9ca3af;">v0.9 &middot; 7. svibnja 2026.</span>
     </div>
   </div>
 </div>
@@ -549,7 +565,23 @@ resetIznos.addEventListener('click', () => { iznosManual = false; recalcIznos();
 updateIzvorDatalist([]);
 
 // Format EUR amounts per ISO 4217 / Croatian convention before submit:
-// "10000.50" -> "10 000,50 EUR"
+// 10000.5 -> "10.000,50 EUR" (točka za tisuće, zarez za decimale)
+function formatEUR(num) {
+  const fixed = Math.abs(num).toFixed(2);
+  const [intPart, decPart] = fixed.split('.');
+  const withThousands = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const sign = num < 0 ? '-' : '';
+  return sign + withThousands + ',' + decPart + ' EUR';
+}
+
+// Format date "2026-05-07" -> "07/05/2026"
+function formatDateHR(iso) {
+  if (!iso) return iso;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return iso;
+  return m[3] + '/' + m[2] + '/' + m[1];
+}
+
 const form = document.querySelector('form');
 form.addEventListener('submit', () => {
   ['ukupna', 'iznos'].forEach(id => {
@@ -557,12 +589,8 @@ form.addEventListener('submit', () => {
     if (!el || el.value === '') return;
     const v = parseFloat(el.value);
     if (!isNaN(v)) {
-      const formatted = v.toLocaleString('hr-HR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }) + ' EUR';
       el.setAttribute('type', 'text');
-      el.value = formatted;
+      el.value = formatEUR(v);
     }
   });
   const p = document.getElementById('postotak');
@@ -573,6 +601,13 @@ form.addEventListener('submit', () => {
       p.value = pv.toLocaleString('hr-HR') + ' %';
     }
   }
+  // Datumi -> DD/MM/GGGG
+  ['datum-pocetka', 'datum-zavrsetka'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || el.value === '') return;
+    el.setAttribute('type', 'text');
+    el.value = formatDateHR(el.value);
+  });
 });
 </script>
 
