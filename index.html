@@ -115,6 +115,18 @@
   }
   textarea { resize: vertical; min-height: 90px; }
   .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .input-suffix { position: relative; }
+  .input-suffix input { padding-right: 44px; }
+  .input-suffix .suffix {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    pointer-events: none;
+  }
   .submit-row {
     display: flex;
     justify-content: flex-end;
@@ -177,11 +189,12 @@
       </div>
     </div>
 
-    <form action="https://formsubmit.co/sevrovic@gmail.com" method="POST">
+    <form action="https://formsubmit.co/msevrovic@fpz.unizg.hr" method="POST">
 
       <input type="hidden" name="_subject" value="Novi zahtjev: Konto kartica projekta">
       <input type="hidden" name="_template" value="table">
       <input type="hidden" name="_captcha" value="true">
+      <input type="hidden" name="_cc" value="fjanus@fpz.unizg.hr,sevrovic@gmail.com">
       <input type="hidden" name="_next" value="https://formsubmit.co/thanks">
       <input type="text" name="_honey" style="display:none">
 
@@ -308,19 +321,29 @@
         <legend>Financijski podaci</legend>
         <div class="row">
           <div class="field">
-            <label>Ukupna vrijednost projekta (EUR)</label>
-            <input type="number" id="ukupna" name="Ukupna vrijednost EUR" min="0" step="0.01">
+            <label>Ukupna vrijednost projekta</label>
+            <div class="input-suffix">
+              <input type="number" id="ukupna" name="Ukupna vrijednost (EUR)" min="0" step="0.01" placeholder="npr. 10000,00">
+              <span class="suffix">EUR</span>
+            </div>
+            <div class="hint">Decimale: zarez (npr. 10 500,50). Iznos se sprema u EUR prema ISO 4217.</div>
           </div>
           <div class="field">
-            <label>Postotak za FPZ (%)</label>
-            <input type="number" id="postotak" name="Postotak za FPZ" min="0" max="100" step="0.01" value="100">
+            <label>Postotak za FPZ</label>
+            <div class="input-suffix">
+              <input type="number" id="postotak" name="Postotak za FPZ" min="0" max="100" step="0.01" value="100">
+              <span class="suffix">%</span>
+            </div>
             <div class="hint" id="postotak-hint">Default 100% (FPZ je nositelj). Za 20+1% projekte: 21%.</div>
           </div>
         </div>
         <div class="row">
           <div class="field">
-            <label>Iznos za FPZ (EUR) <span style="font-weight:400; color: var(--muted);">(auto)</span></label>
-            <input type="number" id="iznos" name="Iznos za FPZ EUR" min="0" step="0.01">
+            <label>Iznos za FPZ <span style="font-weight:400; color: var(--muted);">(auto)</span></label>
+            <div class="input-suffix">
+              <input type="number" id="iznos" name="Iznos za FPZ (EUR)" min="0" step="0.01">
+              <span class="suffix">EUR</span>
+            </div>
             <div class="hint">Računa se automatski (ukupna × postotak). Možeš ručno prepisati.</div>
           </div>
           <div class="field">
@@ -364,11 +387,11 @@
   </div>
 
   <div class="footer-note">
-    <div>Obrada podataka: zahtjev se šalje na sevrovic@gmail.com radi prosljeđivanja u financijsko-računovodstvenu službu FPZ-a.</div>
+    <div>Obrada podataka: zahtjev se šalje financijsko-računovodstvenoj službi FPZ-a (fjanus@fpz.unizg.hr) i u kopiju na msevrovic@fpz.unizg.hr i sevrovic@gmail.com.</div>
     <div style="margin-top: 6px;">
       <a href="https://msevrovic.github.io/Izvori-financiranja---KONTA/index.html" target="_blank" rel="noopener" style="color: var(--navy-dark); text-decoration: none;">Izvori financiranja & konta ↗</a>
       &nbsp;·&nbsp;
-      <span style="color: #9ca3af;">v0.5 &middot; 7. svibnja 2026.</span>
+      <span style="color: #9ca3af;">v0.7 &middot; 7. svibnja 2026.</span>
     </div>
   </div>
 </div>
@@ -507,4 +530,51 @@ mtSelect.addEventListener('change', () => {
     izvorHint.textContent = 'Predloženi izvori za MT ' + mt + ': ' + rule.sources.join(', ') + '. Možeš upisati i drugi.';
   } else {
     updateIzvorDatalist(Object.keys(SOURCE_LABELS));
-  
+    mtHint.textContent = 'Odabir MT-a će predložiti odgovarajući izvor i aktivnost.';
+    izvorHint.textContent = 'Klikni za prijedloge ili upiši proizvoljno.';
+  }
+});
+
+// Korisnik ručno mijenja izvor / aktivnost — ukloni "auto" oznaku
+izvorInput.addEventListener('input', () => { izvorInput.dataset.auto = ''; });
+aktivnostInput.addEventListener('input', () => { aktivnostInput.dataset.auto = ''; });
+
+// Ukupna vrijednost / postotak -> recalc
+ukupna.addEventListener('input', recalcIznos);
+postotak.addEventListener('input', () => { postotak.dataset.touched = '1'; recalcIznos(); });
+iznos.addEventListener('input', () => { iznosManual = true; });
+resetIznos.addEventListener('click', () => { iznosManual = false; recalcIznos(); });
+
+// Inicijalno popuni datalist sa svim izvorima
+updateIzvorDatalist([]);
+
+// Format EUR amounts per ISO 4217 / Croatian convention before submit:
+// "10000.50" -> "10 000,50 EUR"
+const form = document.querySelector('form');
+form.addEventListener('submit', () => {
+  ['ukupna', 'iznos'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || el.value === '') return;
+    const v = parseFloat(el.value);
+    if (!isNaN(v)) {
+      const formatted = v.toLocaleString('hr-HR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }) + ' EUR';
+      el.setAttribute('type', 'text');
+      el.value = formatted;
+    }
+  });
+  const p = document.getElementById('postotak');
+  if (p && p.value !== '') {
+    const pv = parseFloat(p.value);
+    if (!isNaN(pv)) {
+      p.setAttribute('type', 'text');
+      p.value = pv.toLocaleString('hr-HR') + ' %';
+    }
+  }
+});
+</script>
+
+</body>
+</html>
