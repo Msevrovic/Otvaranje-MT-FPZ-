@@ -171,6 +171,10 @@
     <div class="intro">
       Forma za zahtjev otvaranja novog mjesta troška (MT) prema novim šiframa donesenim odlukom Voditelja financijsko-računovodstvene službe.
       Sva polja označena <span style="color: var(--error);">*</span> su obavezna.
+      <div style="margin-top: 10px; font-size: 13px;">
+        <strong>Reference:</strong>
+        <a href="https://msevrovic.github.io/Izvori-financiranja---KONTA/index.html" target="_blank" rel="noopener" style="color: var(--navy-dark); text-decoration: underline; margin-right: 12px;">Pun popis izvora financiranja i konta</a>
+      </div>
     </div>
 
     <form action="https://formsubmit.co/sevrovic@gmail.com" method="POST">
@@ -278,7 +282,7 @@
             </optgroup>
             <option value="Drugo">Drugo (objasniti u napomeni)</option>
           </select>
-          <div class="hint" id="mt-hint">Odabir MT-a će predložiti odgovarajući izvor i aktivnost. Ako se pojavi novi izvor (npr. 564), MT ide pod XXX001.</div>
+          <div class="hint" id="mt-hint">Odabir MT-a će predložiti odgovarajući izvor i aktivnost. Ako se pojavi novi izvor (npr. 564), MT ide pod XXX001. <a href="https://msevrovic.github.io/Izvori-financiranja---KONTA/index.html" target="_blank" rel="noopener" style="color: var(--navy-dark);">Vidi pun popis →</a></div>
         </div>
 
         <div class="row">
@@ -360,7 +364,12 @@
   </div>
 
   <div class="footer-note">
-    Obrada podataka: zahtjev se šalje na sevrovic@fpz.unizg.hr / sevrovic@gmail.com radi prosljeđivanja u financijsko-računovodstvenu službu FPZ-a.
+    <div>Obrada podataka: zahtjev se šalje na sevrovic@gmail.com radi prosljeđivanja u financijsko-računovodstvenu službu FPZ-a.</div>
+    <div style="margin-top: 6px;">
+      <a href="https://msevrovic.github.io/Izvori-financiranja---KONTA/index.html" target="_blank" rel="noopener" style="color: var(--navy-dark); text-decoration: none;">Izvori financiranja & konta ↗</a>
+      &nbsp;·&nbsp;
+      <span style="color: #9ca3af;">v0.5 &middot; 7. svibnja 2026.</span>
+    </div>
   </div>
 </div>
 
@@ -498,24 +507,4 @@ mtSelect.addEventListener('change', () => {
     izvorHint.textContent = 'Predloženi izvori za MT ' + mt + ': ' + rule.sources.join(', ') + '. Možeš upisati i drugi.';
   } else {
     updateIzvorDatalist(Object.keys(SOURCE_LABELS));
-    mtHint.textContent = 'Odabir MT-a će predložiti odgovarajući izvor i aktivnost.';
-    izvorHint.textContent = 'Klikni za prijedloge ili upiši proizvoljno.';
-  }
-});
-
-// Korisnik ručno mijenja izvor / aktivnost — ukloni "auto" oznaku
-izvorInput.addEventListener('input', () => { izvorInput.dataset.auto = ''; });
-aktivnostInput.addEventListener('input', () => { aktivnostInput.dataset.auto = ''; });
-
-// Ukupna vrijednost / postotak -> recalc
-ukupna.addEventListener('input', recalcIznos);
-postotak.addEventListener('input', () => { postotak.dataset.touched = '1'; recalcIznos(); });
-iznos.addEventListener('input', () => { iznosManual = true; });
-resetIznos.addEventListener('click', () => { iznosManual = false; recalcIznos(); });
-
-// Inicijalno popuni datalist sa svim izvorima
-updateIzvorDatalist([]);
-</script>
-
-</body>
-</html>
+  
