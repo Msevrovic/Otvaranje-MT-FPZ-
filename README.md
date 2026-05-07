@@ -62,3 +62,4 @@ s tvojom novom adresom (npr. `sevrovic@fpz.unizg.hr`).
 - **v0.2** — dodan FPZ F-znak + tekst u zaglavlju
 - **v0.3** — pravi FPZ banner (rekreiran iz F-znaka iz potpisa Filipovog maila + 4 reda navy teksta)
 - **v0.4** — cascading dropdowns (kad odabereš MT, predloženi izvor i aktivnost se filtriraju + auto-popunjavaju iz `MT_RULES` mape), katalog izvora financiranja iz `Izvori-financiranja---KONTA` GitHub Pages stranice, automatski izračun "Iznos za FPZ" iz ukupne vrijednosti × postotak (default 100%, 21% za 20+1% projekte), gumb za reset auto-iznosa nakon ručnog unosa. Sva polja ostaju editable — sugestije, ne hard limits.
+- **v0.5** — dodani linkovi na referencu izvora financiranja (msevrovic.github.io/Izvori-financiranja---KONTA) iznad forme i pod hint-om Klasifikacije, plus verzija prikazana u footeru.
